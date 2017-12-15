@@ -12,6 +12,7 @@ from requests import get, RequestException
 from apps.channel.models import ExchangeData
 from apps.channel.models.exchange_data import POLONIEX
 from apps.indicator.models import Price, Volume, PriceResampled
+from apps.signal.models import Signal
 from apps.indicator.models.price import get_currency_value_from_string
 
 from settings import time_speed  # 1 / 10
@@ -114,7 +115,10 @@ def _resample_then_metrics(period_par):
     logger.debug(" ============== Resampling with Period: " + str(period) + " ====")
 
     # get all records back in [period] time ( 15min, 60min, 360min)
-    period_records = Price.objects.filter(timestamp__gte=datetime.now() - timedelta(minutes=period))
+    period_records = Price.objects.filter(
+        source=POLONIEX,
+        timestamp__gte=datetime.now() - timedelta(minutes=period)
+    )
 
     # for all transaction_currencys destined to be resamples
     # COINS_LIST = ["ETH", "XRP", "LTC", "DASH", "NEO", "XMR", "OMG"]
@@ -201,3 +205,10 @@ def _resample_then_metrics(period_par):
                 price_resampled_object.check_rsi_signal()
             except Exception as e:
                 logging.debug(" --> error checking rsi signals: " + str(e))
+
+
+        # todo: Tom's attention
+        try:
+            Signal.check_ichimoku(transaction_currency, counter_currency)
+        except Exception as e:
+            logging.debug(" --> error checking Ichimoku signals: " + str(e))

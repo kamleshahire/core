@@ -4,7 +4,7 @@ import logging
 
 import boto
 from boto.sqs.message import Message
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.db.models.signals import post_save, pre_save
 
@@ -56,6 +56,32 @@ class Signal(Timestampable, models.Model):
 
     timestamp = UnixTimeStampField(null=False)
     sent_at = UnixTimeStampField(use_numeric=True)
+
+    _price_ts = None
+
+    def get_price_ts(self):
+        '''
+        Caches from DB the min nessesary amount of records
+        :return: pd.Series of last ~200 time points
+        '''
+
+        # todo: it does not work correctly, there is no currency if we call static method
+        if self._price_ts is None:
+            back_in_time_records = list(Price.objects.filter(
+                source=POLONIEX,
+                transaction_currency=self.transaction_currency,
+                counter_currency=self.counter_currency,
+                timestamp__gte = datetime.now() - timedelta(minutes=(self.period * max([self.sma_high_period, self.ema_high_period])))
+            ).values('price'))
+
+            if not back_in_time_records:
+                return None
+
+            # convert price into a time Series (pandas)
+            self._resampled_price_ts = pd.Series([rec['closing_price'] for rec in back_in_time_records])
+            # TALIB: price_ts_nd = np.array([ rec['mean_price_satoshis'] for rec in raw_data])
+
+        return self._resampled_price_ts
 
     # MODEL PROPERTIES
 
@@ -167,3 +193,21 @@ def send_signal(sender, instance, **kwargs):
             logging.debug("signal sent and timstamp saved")
         except Exception as e:
             logging.error(str(e))
+
+# todo: Tom's attention -
+# at a time of calling this static method (from trawl_poloniex) I need transaction_currency and counter_currency already set
+# and I am not happy with sending it as porameters
+# How can I set in django a parent class SignalParent so I can create it and fill currencies pror to calling check_ichimoku
+# without creating a signal in DB?
+# then I can call SignalParent.check_signal and that method will create a DB record if neccesary
+# may be any other more elegant ideas?
+
+@staticmethod
+def check_ichimoku(transaction_currency, counter_currency):
+    logging.debug("    Ichimoky checking started")
+
+
+    # I need
+
+
+    # get price information back in time for neccesary steps
