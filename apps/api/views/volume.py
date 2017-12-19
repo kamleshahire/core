@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponse
 from django.views.generic import View
 
-from apps.indicator.models import Volume as VolumeModel
+from apps.metric.models import Volume as VolumeModel
 
 
 class Volume(View):

@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from apps.user.models import User as UserModel
 
-from apps.indicator.models import Price as PriceModel
+from apps.metric.models import Price as PriceModel
 from settings import TEAM_EMOJIS
 
 logger = logging.getLogger(__name__)

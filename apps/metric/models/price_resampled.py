@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 from django.db import models
 
-from apps.indicator.models.abstract_indicator import AbstractIndicator
-from apps.indicator.models.price import Price
+from apps.metric.models.abstract_indicator import AbstractIndicator
+from apps.metric.models.price import Price
 from apps.signal.models import Signal
 from apps.user.models.user import get_horizon_value_from_string
 from settings import HORIZONS_TIME2NAMES  # mapping from bin size to a name short/medium

@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from django.db.models.signals import post_save, pre_save
 
 from apps.common.behaviors import Timestampable
-from apps.indicator.models import Price
+from apps.metric.models import Price
 from settings import QUEUE_NAME, AWS_OPTIONS, BETA_QUEUE_NAME, TEST_QUEUE_NAME
 from django.db import models
 from unixtimestampfield.fields import UnixTimeStampField

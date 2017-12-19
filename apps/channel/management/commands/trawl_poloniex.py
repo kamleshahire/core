@@ -11,9 +11,9 @@ from requests import get, RequestException
 
 from apps.channel.models import ExchangeData
 from apps.channel.models.exchange_data import POLONIEX
-from apps.indicator.models import Price, Volume, PriceResampled
+from apps.metric.models import Price, Volume, PriceResampled
 from apps.signal.models import Signal
-from apps.indicator.models.price import get_currency_value_from_string
+from apps.metric.models.price import get_currency_value_from_string
 
 from settings import time_speed  # 1 / 10
 from settings import COINS_LIST_TO_GENERATE_SIGNALS
@@ -95,6 +95,35 @@ def _save_prices_and_volumes(data, timestamp):
             logger.debug(str(e))
 
     logger.debug("Saved Poloniex price and volume data")
+
+
+
+
+# new proposed logic to replace _resample_then_metrics function
+
+def _compile_indicators(period_par):
+
+    period = period_par['period']
+    logger.debug(" ============== Resampling with Period: " + str(period) + " ====")
+
+    # get all records back in [period] time ( 15min, 60min, 360min)
+    period_records = Price.objects.filter(
+        source=POLONIEX,
+        timestamp__gte=datetime.now() - timedelta(minutes=period)
+    )
+
+    from apps.metric.indicators.relative_strength import RelativeStrength
+
+    level_1_indicators_list = [MovingAverage, RelativeStrength]
+
+    for indicator in level_1_indicators_list:
+        indicator.run_indicator(period_records)
+
+# end new proposed logic to replace _resample_then_metrics function
+
+
+
+
 
 
 # @Alex

@@ -1,6 +1,6 @@
 import json
 import csv
-from apps.indicator.models import Price
+from apps.metric.models import Price
 from django.http import HttpResponse
 from django.views.generic import View
 

@@ -3,7 +3,7 @@ import json
 from django.http import HttpResponse
 from django.views.generic import View
 
-from apps.indicator.models import Price as PriceModel
+from apps.metric.models import Price as PriceModel
 
 
 class Price(View):
